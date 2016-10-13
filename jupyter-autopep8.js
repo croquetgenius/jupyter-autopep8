@@ -19,13 +19,9 @@ define(function (require, exports, module) {
 
     var cfg = {code_format_hotkey: 'Ctrl-L'};
 
-    // list of availables kernels
-    var userKernels;
-
-
     var kMap = { // map of parameters for supported kernels
         python: {
-            library: 'from yapf.yapflib.yapf_api import FormatCode',
+            library: 'import autopep8, re',
             exec: yapf_format,
             post_exec: ''
         }
@@ -33,7 +29,6 @@ define(function (require, exports, module) {
 
 
     function initialize() {
-        // create config object to load parameters
         var base_url = utils.get_body_data("baseUrl");
         var config = new confMod.ConfigSection('notebook', {base_url: base_url});
         config.load();
@@ -43,41 +38,35 @@ define(function (require, exports, module) {
                     cfg[key] = config.data[key];
                 }
             }
-            code_format_hotkey(); //initialize hotkey
+            code_format_hotkey();
         })
     }
 
     function code_exec_callback(msg) {
-
         if (msg.msg_type == "error") {
-            if (exec_code_verbose) alert("CODE prettify extension\n Error: " + msg.content.ename + "\n" + msg.content.evalue)
-            return
+            if (exec_code_verbose) alert("CODE prettify extension\n Error: " + msg.content.ename + "\n" + msg.content.evalue);
+            return;
         }
         if (replace_in_cell) {
-            if (kernelLanguage == "python") {
-                var ret = msg.content.data['text/plain'];
-                //console.log("RETURNED code", ret)
-                var quote = String(ret[ret.length - 1])
-                var reg = RegExp(quote + '[\\S\\s]*' + quote)
-                var ret = String(ret).match(reg)[0] // extract text between quotes
-                ret = ret.substr(1, ret.length - 2) //suppress quotes 
-                ret = ret.replace(/([^\\])\\n/g, "$1\n") // replace \n if not escaped
-                    .replace(/([^\\])\\\\\\n/g, "$1\\\n") // [continuation line] replace \ at eol (but no conversion)
-                    .replace(/\\'/g, "'") // replace simple quotes
-                    .replace(/\\\\/g, "\\") // unescape
+            var ret = msg.content.data['text/plain'];
+            for (var i = 1; i < ret.length; i++) {
+                if (ret[i - 1] == '\\' && ret[i] == 'n' && (i == 1 || ret[i - 2] != "\\")) {
+                    var p = i - 2 >= 0 ? ret.substring(0, i - 1) : "";
+                    var s = i + 1 <= ret.length ? ret.substring(i + 1) : "";
+                    ret = p + "\n" + s;
+                    i = 0;
+                }
+
             }
 
-            if (kernelLanguage == "r") {
-                var ret = msg.content['text'];
-                var ret = String(ret).replace(/\\"/gm, "'").replace(/\\n/gm, '\n').replace(/\$\!\$/gm, "\\n")
-            }
-            if (kernelLanguage == "javascript") {
-                var ret = msg.content.data['text/plain'];
-                var ret = String(ret).substr(1, ret.length - 1)
-                    .replace(/\\'/gm, "'").replace(/\\n/gm, '\n').replace(/\$\!\$/gm, "\\n")
-            }
-            //yapf/formatR - cell (file) ends with a blank line. Here, still remove the last blank line
-            var ret = ret.substr(0, ret.length - 1) //last blank line/quote char for javascript kernel
+            ret = ret
+                .substring(1, ret.length - 2)
+                .replace(/\\'/g, "'")
+                .replace(/\\"/g, '"')
+                .replace(/\\\//g, '/')
+                .replace(/\\x3c/g, '<')
+                .replace(/\\x3e/g, '>')
+                .replace(/\\\\/g, '\\');
             var selected_cell = Jupyter.notebook.get_selected_cell();
             selected_cell.set_text(String(ret));
         }
@@ -85,13 +74,12 @@ define(function (require, exports, module) {
 
 
     function exec_code(code_input) {
+        console.log(code_input);
         Jupyter.notebook.kernel.execute(code_input, {iopub: {output: code_exec_callback}}, {silent: false});
     }
 
 
     function yapf_format(index) {
-        //var selected_cell = Jupyter.notebook.get_selected_cell();
-        index = index;
         Jupyter.notebook.select(index);
         var selected_cell = Jupyter.notebook.get_selected_cell();
         if (selected_cell instanceof CodeCell) {
@@ -101,7 +89,7 @@ define(function (require, exports, module) {
             var text = selected_cell.get_text();
             text = JSON.stringify(text)
                 .replace(/([^\\])\\\\\\n/g, "$1");// [continuation line] replace \ at eol (but result will be on a single line)
-            var code_input = 'FormatCode(' + text + ')[0]';
+            var code_input = 'autopep8.fix_code(' + text + ')';
             //console.log("INPUT",code_input)
             exec_code(code_input, index)
         }
@@ -133,14 +121,12 @@ define(function (require, exports, module) {
     }
 
     function getKernelInfos() {
-        //console.log("--->kernel_ready.Kernel")
         kName = Jupyter.notebook.kernel.name;
-        kernelLanguage = Jupyter.notebook.metadata.kernelspec.language.toLowerCase()
-        var knownKernel = kMap[kernelLanguage]
+        kernelLanguage = Jupyter.notebook.metadata.kernelspec.language.toLowerCase();
+        var knownKernel = kMap[kernelLanguage];
         if (!knownKernel) {
-            $('#code_format_button').remove()
+            $('#code_format_button').remove();
             alert("Sorry; code prettify nbextension only works with a Python, R or javascript kernel");
-
         } else {
             code_format_button();
             Jupyter.keyboard_manager.edit_shortcuts.add_shortcuts(add_edit_shortcuts);
@@ -151,7 +137,6 @@ define(function (require, exports, module) {
 
 
     function load_notebook_extension() {
-
         initialize();
 
         if (typeof Jupyter.notebook.kernel !== "undefined" && Jupyter.notebook.kernel != null) {
