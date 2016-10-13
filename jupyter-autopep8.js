@@ -7,7 +7,7 @@ define(function (require, exports, module) {
     var Jupyter = require('base/js/namespace');
     var keyboard = require('base/js/keyboard');
     var utils = require('base/js/utils');
-    var configmod = require('services/config');
+    var confMod = require('services/config');
     var Cell = require('notebook/js/cell').Cell;
     var CodeCell = require('notebook/js/codecell').CodeCell;
 
@@ -17,9 +17,7 @@ define(function (require, exports, module) {
     var kName; // name of current kernel
     var kernelLanguage; // language associated with kernel
 
-    var cfg = {
-        code_format_hotkey: 'Ctrl-L',
-    }
+    var cfg = {code_format_hotkey: 'Ctrl-L'};
 
     // list of availables kernels
     var userKernels;
@@ -30,24 +28,14 @@ define(function (require, exports, module) {
             library: 'from yapf.yapflib.yapf_api import FormatCode',
             exec: yapf_format,
             post_exec: ''
-        },
-        r: { // intentionally in lower case
-            library: 'library(formatR)',
-            exec: autoR_format,
-            post_exec: ''
-        },
-        javascript: {
-            library: String('var beautify' + ' = require' + '("js-beautify").js_beautify'),
-            exec: js_beautify,
-            post_exec: ''
-        },
-    }
+        }
+    };
 
 
     function initialize() {
         // create config object to load parameters
         var base_url = utils.get_body_data("baseUrl");
-        var config = new configmod.ConfigSection('notebook', {base_url: base_url});
+        var config = new confMod.ConfigSection('notebook', {base_url: base_url});
         config.load();
         config.loaded.then(function config_loaded_callback() {
             for (var key in cfg) {
@@ -101,27 +89,6 @@ define(function (require, exports, module) {
     }
 
 
-    function js_beautify() {
-        var selected_cell = Jupyter.notebook.get_selected_cell();
-        if (selected_cell instanceof CodeCell) {
-            var text = selected_cell.get_text().replace(/\\n/gm, "$!$")
-                .replace(/\n/gm, "\\n")
-                .replace(/\'/gm, "\\'")
-            var code_input = "beautify(text='" + text + "')"
-            exec_code(code_input)
-        }
-    }
-
-    function autoR_format() {
-        var selected_cell = Jupyter.notebook.get_selected_cell();
-        if (selected_cell instanceof CodeCell) {
-            var text = selected_cell.get_text().replace(/\\n/gm, "$!$")
-                .replace(/\'/gm, "\\'").replace(/\\"/gm, "\\'")
-            var code_input = "tidy_source(text='" + text + "')"
-            exec_code(code_input)
-        }
-    }
-
     function yapf_format(index) {
         //var selected_cell = Jupyter.notebook.get_selected_cell();
         index = index;
@@ -131,10 +98,10 @@ define(function (require, exports, module) {
             var text = selected_cell.get_text()
                 .replace(/\\n/gm, "$!$") // Replace escaped \n by $!$
                 .replace(/\"/gm, '\\"'); // Escape double quote
-            var text = selected_cell.get_text()
+            var text = selected_cell.get_text();
             text = JSON.stringify(text)
-                .replace(/([^\\])\\\\\\n/g, "$1") // [continuation line] replace \ at eol (but result will be on a single line) 
-            var code_input = 'FormatCode(' + text + ')[0]'
+                .replace(/([^\\])\\\\\\n/g, "$1");// [continuation line] replace \ at eol (but result will be on a single line)
+            var code_input = 'FormatCode(' + text + ')[0]';
             //console.log("INPUT",code_input)
             exec_code(code_input, index)
         }
@@ -193,7 +160,7 @@ define(function (require, exports, module) {
 
         // only if kernel_ready (but kernel may be loaded before)
         $([Jupyter.events]).on("kernel_ready.Kernel", function () {
-            console.log("code_prettify: restarting")
+            console.log("code_prettify: restarting");
             getKernelInfos();
         });
     }
