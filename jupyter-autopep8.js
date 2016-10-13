@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter-Contrib Team.
 // Distributed under the terms of the Modified BSD License.
 
-define(function(require, exports, module) {
+define(function (require, exports, module) {
     'use strict';
 
     var Jupyter = require('base/js/namespace');
@@ -47,7 +47,7 @@ define(function(require, exports, module) {
     function initialize() {
         // create config object to load parameters
         var base_url = utils.get_body_data("baseUrl");
-        var config = new configmod.ConfigSection('notebook', { base_url: base_url });
+        var config = new configmod.ConfigSection('notebook', {base_url: base_url});
         config.load();
         config.loaded.then(function config_loaded_callback() {
             for (var key in cfg) {
@@ -74,7 +74,7 @@ define(function(require, exports, module) {
                 var ret = String(ret).match(reg)[0] // extract text between quotes
                 ret = ret.substr(1, ret.length - 2) //suppress quotes 
                 ret = ret.replace(/([^\\])\\n/g, "$1\n") // replace \n if not escaped
-                .replace(/([^\\])\\\\\\n/g, "$1\\\n") // [continuation line] replace \ at eol (but no conversion)
+                    .replace(/([^\\])\\\\\\n/g, "$1\\\n") // [continuation line] replace \ at eol (but no conversion)
                     .replace(/\\'/g, "'") // replace simple quotes
                     .replace(/\\\\/g, "\\") // unescape
             }
@@ -97,7 +97,7 @@ define(function(require, exports, module) {
 
 
     function exec_code(code_input) {
-        Jupyter.notebook.kernel.execute(code_input, { iopub: { output: code_exec_callback } }, { silent: false });
+        Jupyter.notebook.kernel.execute(code_input, {iopub: {output: code_exec_callback}}, {silent: false});
     }
 
 
@@ -132,7 +132,7 @@ define(function(require, exports, module) {
                 .replace(/\\n/gm, "$!$") // Replace escaped \n by $!$
                 .replace(/\"/gm, '\\"'); // Escape double quote
             var text = selected_cell.get_text()
-            text = JSON.stringify(text)    
+            text = JSON.stringify(text)
                 .replace(/([^\\])\\\\\\n/g, "$1") // [continuation line] replace \ at eol (but result will be on a single line) 
             var code_input = 'FormatCode(' + text + ')[0]'
             //console.log("INPUT",code_input)
@@ -192,7 +192,7 @@ define(function(require, exports, module) {
         }
 
         // only if kernel_ready (but kernel may be loaded before)
-        $([Jupyter.events]).on("kernel_ready.Kernel", function() {
+        $([Jupyter.events]).on("kernel_ready.Kernel", function () {
             console.log("code_prettify: restarting")
             getKernelInfos();
         });

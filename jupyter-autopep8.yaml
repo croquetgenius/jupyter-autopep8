@@ -2,7 +2,7 @@ Type: IPython Notebook Extension
 Name: Jupyter autopep8
 Description: Use autopep8 to reformat/prettify Python code cells
 Link: README.md
-Main: code_prettify.js
+Main: jupyter-autopep8.js
 Compatibility: Jupyter (4.x) 
 Parameters:
 - name: code_format_hotkey 

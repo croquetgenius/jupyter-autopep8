@@ -27,9 +27,6 @@ Then the extension provides
 - a keyboard shortcut for reformatting the current code-cell (default: Ctrl-L)
 
 Syntax shall be correct. The extension will also point basic syntax errors. 
-![](demo-py.gif)
-![](demo-R.gif)
-![](demo-jv.gif)
 
 
 
