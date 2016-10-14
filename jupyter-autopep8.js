@@ -107,18 +107,17 @@ define(function (require, exports, module) {
     function code_format_hotkey() {
         add_edit_shortcuts[cfg['code_format_hotkey']] = {
             help: "code formatting",
-            help_index: 'yf',
+            help_index: 'autopep8',
             handler: auto_format
         };
     }
 
     function get_kernel_info() {
-        var kName = Jupyter.notebook.kernel.name;
         kernel_language = Jupyter.notebook.metadata.kernelspec.language.toLowerCase();
         var knownKernel = kernel_map[kernel_language];
         if (!knownKernel) {
             $('#code_format_button').remove();
-            alert("Sorry; code prettify nbextension only works with a Python, R or javascript kernel");
+            alert("Sorry; code prettify nbextension only works with a Python kernel");
         } else {
             code_format_button();
             Jupyter.keyboard_manager.edit_shortcuts.add_shortcuts(add_edit_shortcuts);
