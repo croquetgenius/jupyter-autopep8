@@ -5,7 +5,6 @@ Under the hood, it uses the [autopep8](https://github.com/hhatto/autopep8) Pytho
 
 **pre-requisites:** of course, you must have some of the corresponding packages installed:
 
-- for Python 
 ```
 pip install autopep8 [--user]
 ``` 
