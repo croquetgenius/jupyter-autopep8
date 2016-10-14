@@ -27,3 +27,5 @@ Otherwise, you can still install/try the extension from personal repo, using
 jupyter nbextension install https://github.com/kenkoooo/jupyter-autopep8/archive/master.zip --user
 jupyter nbextension enable jupyter-autopep8-master/jupyter-autopep8
 ```
+# Forked From
+[jfbercher/code_prettify](https://github.com/jfbercher/code_prettify)
