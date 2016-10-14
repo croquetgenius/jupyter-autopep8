@@ -7,22 +7,19 @@ define(function (require, exports, module) {
     var Jupyter = require('base/js/namespace');
     var keyboard = require('base/js/keyboard');
     var utils = require('base/js/utils');
-    var confMod = require('services/config');
-    var Cell = require('notebook/js/cell').Cell;
+    var config_module = require('services/config');
     var CodeCell = require('notebook/js/codecell').CodeCell;
 
     var add_edit_shortcuts = {};
-    var replace_in_cell = false; //bool to enable/disable replacements 
-    var exec_code_verbose = true;
-    var kName; // name of current kernel
+    var replace_in_cell = false; //bool to enable/disable replacements
     var kernelLanguage; // language associated with kernel
 
     var cfg = {code_format_hotkey: 'Ctrl-L'};
 
-    var kMap = { // map of parameters for supported kernels
+    var kernel_map = {
         python: {
-            library: 'import autopep8, re',
-            exec: yapf_format,
+            library: 'import autopep8',
+            exec: autopep8_format,
             post_exec: ''
         }
     };
@@ -30,7 +27,7 @@ define(function (require, exports, module) {
 
     function initialize() {
         var base_url = utils.get_body_data("baseUrl");
-        var config = new confMod.ConfigSection('notebook', {base_url: base_url});
+        var config = new config_module.ConfigSection('notebook', {base_url: base_url});
         config.load();
         config.loaded.then(function config_loaded_callback() {
             for (var key in cfg) {
@@ -44,7 +41,7 @@ define(function (require, exports, module) {
 
     function code_exec_callback(msg) {
         if (msg.msg_type == "error") {
-            if (exec_code_verbose) alert("CODE prettify extension\n Error: " + msg.content.ename + "\n" + msg.content.evalue);
+            alert("autopep8 extension\n Error: " + msg.content.ename + "\n" + msg.content.evalue);
             return;
         }
         if (replace_in_cell) {
@@ -59,8 +56,7 @@ define(function (require, exports, module) {
 
             }
 
-            ret = ret
-                .substring(1, ret.length - 2)
+            ret = ret.substring(1, ret.length - 2)
                 .replace(/\\'/g, "'")
                 .replace(/\\"/g, '"')
                 .replace(/\\\//g, '/')
@@ -79,13 +75,10 @@ define(function (require, exports, module) {
     }
 
 
-    function yapf_format(index) {
+    function autopep8_format(index) {
         Jupyter.notebook.select(index);
         var selected_cell = Jupyter.notebook.get_selected_cell();
         if (selected_cell instanceof CodeCell) {
-            var text = selected_cell.get_text()
-                .replace(/\\n/gm, "$!$") // Replace escaped \n by $!$
-                .replace(/\"/gm, '\\"'); // Escape double quote
             var text = selected_cell.get_text();
             text = JSON.stringify(text)
                 .replace(/([^\\])\\\\\\n/g, "$1");// [continuation line] replace \ at eol (but result will be on a single line)
@@ -97,7 +90,7 @@ define(function (require, exports, module) {
 
     function autoFormat() {
         replace_in_cell = true;
-        kMap[kernelLanguage].exec()
+        kernel_map[kernelLanguage].exec()
     }
 
 
@@ -120,10 +113,10 @@ define(function (require, exports, module) {
         };
     }
 
-    function getKernelInfos() {
-        kName = Jupyter.notebook.kernel.name;
+    function get_kernel_info() {
+        var kName = Jupyter.notebook.kernel.name;
         kernelLanguage = Jupyter.notebook.metadata.kernelspec.language.toLowerCase();
-        var knownKernel = kMap[kernelLanguage];
+        var knownKernel = kernel_map[kernelLanguage];
         if (!knownKernel) {
             $('#code_format_button').remove();
             alert("Sorry; code prettify nbextension only works with a Python, R or javascript kernel");
@@ -131,7 +124,7 @@ define(function (require, exports, module) {
             code_format_button();
             Jupyter.keyboard_manager.edit_shortcuts.add_shortcuts(add_edit_shortcuts);
             replace_in_cell = false;
-            exec_code(kMap[kernelLanguage].library)
+            exec_code(kernel_map[kernelLanguage].library)
         }
     }
 
@@ -140,13 +133,12 @@ define(function (require, exports, module) {
         initialize();
 
         if (typeof Jupyter.notebook.kernel !== "undefined" && Jupyter.notebook.kernel != null) {
-            getKernelInfos();
+            get_kernel_info();
         }
 
-        // only if kernel_ready (but kernel may be loaded before)
         $([Jupyter.events]).on("kernel_ready.Kernel", function () {
-            console.log("code_prettify: restarting");
-            getKernelInfos();
+            console.log("jupyter-autopep8: restarting");
+            get_kernel_info();
         });
     }
 
