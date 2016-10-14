@@ -117,7 +117,7 @@ define(function (require, exports, module) {
         var knownKernel = kernel_map[kernel_language];
         if (!knownKernel) {
             $('#code_format_button').remove();
-            alert("Sorry; code prettify nbextension only works with a Python kernel");
+            alert("Sorry; autopep8 nbextension only works with a Python kernel");
         } else {
             code_format_button();
             Jupyter.keyboard_manager.edit_shortcuts.add_shortcuts(add_edit_shortcuts);
