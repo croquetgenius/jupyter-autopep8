@@ -12,7 +12,7 @@ define(function (require, exports, module) {
 
     var add_edit_shortcuts = {};
     var replace_in_cell = false; //bool to enable/disable replacements
-    var kernelLanguage; // language associated with kernel
+    var kernel_language; // language associated with kernel
 
     var cfg = {code_format_hotkey: 'Ctrl-L'};
 
@@ -89,7 +89,7 @@ define(function (require, exports, module) {
 
     function auto_format() {
         replace_in_cell = true;
-        kernel_map[kernelLanguage].exec()
+        kernel_map[kernel_language].exec()
     }
 
 
@@ -114,8 +114,8 @@ define(function (require, exports, module) {
 
     function get_kernel_info() {
         var kName = Jupyter.notebook.kernel.name;
-        kernelLanguage = Jupyter.notebook.metadata.kernelspec.language.toLowerCase();
-        var knownKernel = kernel_map[kernelLanguage];
+        kernel_language = Jupyter.notebook.metadata.kernelspec.language.toLowerCase();
+        var knownKernel = kernel_map[kernel_language];
         if (!knownKernel) {
             $('#code_format_button').remove();
             alert("Sorry; code prettify nbextension only works with a Python, R or javascript kernel");
@@ -123,7 +123,7 @@ define(function (require, exports, module) {
             code_format_button();
             Jupyter.keyboard_manager.edit_shortcuts.add_shortcuts(add_edit_shortcuts);
             replace_in_cell = false;
-            exec_code(kernel_map[kernelLanguage].library)
+            exec_code(kernel_map[kernel_language].library)
         }
     }
 
