@@ -1,8 +1,7 @@
 # Jupyter autopep8
 
 This extension reformats/prettifies code in a notebook's code cell. 
-It currently supports only Python.
-Under the hood, it uses the [autopep8](https://github.com/hhatto/autopep8) Python module to reformat Python code.
+Under the hood, it uses the [autopep8](https://github.com/hhatto/autopep8) Python module to reformat Python code to conform to the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide.
 
 **pre-requisites:** of course, you must have some of the corresponding packages installed:
 
