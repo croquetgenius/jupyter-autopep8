@@ -81,14 +81,13 @@ define(function (require, exports, module) {
         if (selected_cell instanceof CodeCell) {
             var text = selected_cell.get_text();
             text = JSON.stringify(text)
-                .replace(/([^\\])\\\\\\n/g, "$1");// [continuation line] replace \ at eol (but result will be on a single line)
+                .replace(/([^\\])\\\\\\n/g, "$1");
             var code_input = 'autopep8.fix_code(' + text + ')';
-            //console.log("INPUT",code_input)
             exec_code(code_input, index)
         }
     }
 
-    function autoFormat() {
+    function auto_format() {
         replace_in_cell = true;
         kernel_map[kernelLanguage].exec()
     }
@@ -99,7 +98,7 @@ define(function (require, exports, module) {
             Jupyter.toolbar.add_buttons_group([{
                 'label': 'Code formatting',
                 'icon': 'fa-legal',
-                'callback': autoFormat,
+                'callback': auto_format,
                 'id': 'code_format_button'
             }]);
         }
@@ -109,7 +108,7 @@ define(function (require, exports, module) {
         add_edit_shortcuts[cfg['code_format_hotkey']] = {
             help: "code formatting",
             help_index: 'yf',
-            handler: autoFormat
+            handler: auto_format
         };
     }
 
