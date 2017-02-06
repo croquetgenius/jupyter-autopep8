@@ -45,18 +45,24 @@ define(function (require, exports, module) {
             return;
         }
         if (replace_in_cell) {
-            var dict = {
-                x3c: '<',
-                x3e: '>'
-            };
-            var ret = msg.content.data['text/plain']
-                .substring(1, ret.length - 2)
-                .replace(/([^\\])\\n/g, function(_, p1) {
-                    return p1 + '\n';
-                })
-                .replace(/\\('|"|\/|\\|x3c|x3e)/g, function(_, p1) {
-                    return dict[p1] || p1;
-                });
+            var ret = msg.content.data['text/plain'];
+            for (var i = 1; i < ret.length; i++) {
+                if (ret[i - 1] == '\\' && ret[i] == 'n' && (i == 1 || ret[i - 2] != "\\")) {
+                    var p = i - 2 >= 0 ? ret.substring(0, i - 1) : "";
+                    var s = i + 1 <= ret.length ? ret.substring(i + 1) : "";
+                    ret = p + "\n" + s;
+                    i = 0;
+                }
+
+            }
+
+            ret = ret.substring(1, ret.length - 2)
+                .replace(/\\'/g, "'")
+                .replace(/\\"/g, '"')
+                .replace(/\\\//g, '/')
+                .replace(/\\x3c/g, '<')
+                .replace(/\\x3e/g, '>')
+                .replace(/\\\\/g, '\\');
             var selected_cell = Jupyter.notebook.get_selected_cell();
             selected_cell.set_text(String(ret));
         }
