@@ -14,7 +14,7 @@ define(function (require, exports, module) {
     var replace_in_cell = false; //bool to enable/disable replacements
     var kernel_language; // language associated with kernel
 
-    var cfg = {code_format_hotkey: 'Ctrl-L'};
+    var cfg = {code_format_hotkey: 'Ctrl-L', aggressive: 1};
 
     var kernel_map = {
         python: {
@@ -82,7 +82,7 @@ define(function (require, exports, module) {
             var text = selected_cell.get_text();
             text = JSON.stringify(text)
                 .replace(/([^\\])\\\\\\n/g, "$1");
-            var code_input = 'autopep8.fix_code(' + text + ')';
+            var code_input = 'autopep8.fix_code(' + text + ', options={'aggressive': cfg['aggressive']})';
             exec_code(code_input, index)
         }
     }

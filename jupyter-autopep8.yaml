@@ -7,5 +7,9 @@ Compatibility: Jupyter (4.x)
 Parameters:
 - name: code_format_hotkey 
   description: Hotkey to call the code prettify
-  input_type: text
+  input_type: hotkey
   default: 'Ctrl-L'
+- name: aggressive
+  description: Enable non-whitespace changes. Higher value result in more aggressive changes.
+  input_type: number
+  default: '1'
